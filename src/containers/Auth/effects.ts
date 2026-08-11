@@ -122,7 +122,6 @@ export async function signOut(dispatch: AuthDispatch): Promise<void> {
     // Ignored on purpose — see the reducer's SIGN_OUT_SUCCESS note.
   } finally {
     removeKey(STORAGE_KEYS.token);
-    removeKey(STORAGE_KEYS.auth);
     dispatch(signOutSuccessAction());
   }
 }

@@ -4,14 +4,26 @@ import { BagProvider } from './context/BagContext';
 import { Login } from './pages/Login';
 import { Categories } from './pages/Categories';
 import { CategoryDetail } from './pages/CategoryDetail';
+import { Splash } from './components/Splash';
 
+/**
+ * Both guards wait on `booting`. The stored token has to be checked against the
+ * API before either can answer, and deciding early gets it wrong in both
+ * directions — a signed-in user refreshing would be thrown to the login screen,
+ * and someone with an expired token would see the app flash before being
+ * kicked out of it.
+ */
 function RequireAuth() {
-  const { user } = useAuth();
+  const { user, booting } = useAuth();
+
+  if (booting) return <Splash />;
   return user ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
 function RedirectIfSignedIn() {
-  const { user } = useAuth();
+  const { user, booting } = useAuth();
+
+  if (booting) return <Splash />;
   return user ? <Navigate to="/" replace /> : <Login />;
 }
 

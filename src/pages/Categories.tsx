@@ -9,9 +9,19 @@ import { CategoryTile } from '../components/CategoryTile';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Modal } from '../components/Modal';
 import { CategoryForm } from '../components/CategoryForm';
+import { Splash } from '../components/Splash';
+import { ErrorBanner } from '../components/ErrorBanner';
 
 export function Categories() {
-  const { categories, items, addCategory } = useBag();
+  const {
+    categories,
+    items,
+    addCategory,
+    loading,
+    error,
+    reload,
+    clearError,
+  } = useBag();
   const { signOut } = useAuth();
   const { theme, toggle } = useTheme();
   const [adding, setAdding] = useState(false);
@@ -41,6 +51,10 @@ export function Categories() {
     return counts;
   }, [categories, items]);
 
+  // Only the very first fetch blocks the screen. Once there's a bag to show,
+  // a later reload happens underneath it rather than blanking it out.
+  if (loading && categories.length === 0) return <Splash />;
+
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-6">
       <header className="flex items-center justify-between gap-3">
@@ -58,6 +72,10 @@ export function Categories() {
           </button>
         </div>
       </header>
+
+      {error && (
+        <ErrorBanner message={error} onRetry={reload} onDismiss={clearError} />
+      )}
 
       <section className="mt-5 flex gap-2" aria-label="Overview">
         <StatCard label="Total items" value={stats.total} />

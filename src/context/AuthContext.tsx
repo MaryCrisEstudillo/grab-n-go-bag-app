@@ -2,92 +2,87 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from 'react';
-import * as auth from '../lib/auth';
+import { readString, STORAGE_KEYS } from '../lib/storage';
 import authReducer, {
   initialState,
   type AuthContainerState,
 } from '../containers/Auth/reducer';
-import {
-  clearErrorAction,
-  registerFailAction,
-  registerSuccessAction,
-  signInFailAction,
-  signInSuccessAction,
-  signOutSuccessAction,
-} from '../containers/Auth/actions';
+import { clearErrorAction } from '../containers/Auth/actions';
+import * as effects from '../containers/Auth/effects';
 
 /**
- * ─── SWAP POINT ──────────────────────────────────────────────────────────────
- * Session state lives in `containers/Auth`; the credential check still runs
- * through the stub in `lib/auth.ts`, which answers synchronously. That is why
- * `signIn` and `register` return an `AuthResult` — the form reads it directly.
+ * Session state, backed by the API.
  *
- * Against the real service, call `containers/Auth/effects.ts` instead and read
- * the outcome off `error` rather than a return value; the reducer already
- * handles the loading and failure states those effects dispatch.
- * ─────────────────────────────────────────────────────────────────────────────
+ * The container owns every transition; this provider is the wiring. Actions are
+ * dispatched by the effects rather than from here, so a component never sees a
+ * half-applied sign-in.
  */
 
 interface AuthContextValue extends AuthContainerState {
-  signIn: (email: string, password: string) => auth.AuthResult;
+  /**
+   * True while the stored token is being checked on first paint. The route
+   * guard has to wait for it — without this, a signed-in user refreshing the
+   * page is bounced to the login screen for the length of one request.
+   */
+  booting: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
   register: (
     email: string,
     password: string,
     confirmPassword: string,
-  ) => auth.AuthResult;
-  signOut: () => void;
+  ) => Promise<void>;
+  signOut: () => Promise<void>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/** A session already in storage means the user never sees the login screen. */
-function initState(): AuthContainerState {
-  return { ...initialState, user: auth.currentUser() };
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(authReducer, undefined, initState);
+  const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const signIn = useCallback((email: string, password: string) => {
-    const result = auth.signIn(email, password);
+  // No token means nothing to restore, so don't make anyone wait on a request
+  // that can only fail.
+  const [booting, setBooting] = useState(() => Boolean(readString(STORAGE_KEYS.token)));
 
-    if (result.ok) {
-      dispatch(signInSuccessAction(result.user));
-    } else {
-      dispatch(signInFailAction({ field: result.field, message: result.message }));
-    }
-    return result;
+  useEffect(() => {
+    if (!booting) return;
+
+    let cancelled = false;
+    void effects.checkAuth(dispatch).finally(() => {
+      if (!cancelled) setBooting(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // Runs once: `booting` only ever goes true → false.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const register = useCallback(
-    (email: string, password: string, confirmPassword: string) => {
-      const result = auth.register(email, password, confirmPassword);
-
-      if (result.ok) {
-        dispatch(registerSuccessAction(result.user));
-      } else {
-        dispatch(registerFailAction({ field: result.field, message: result.message }));
-      }
-      return result;
-    },
+  const signIn = useCallback(
+    (email: string, password: string) => effects.signIn(dispatch, email, password),
     [],
   );
 
-  const signOut = useCallback(() => {
-    auth.signOut();
-    dispatch(signOutSuccessAction());
-  }, []);
+  const register = useCallback(
+    (email: string, password: string, confirmPassword: string) =>
+      effects.register(dispatch, email, password, confirmPassword),
+    [],
+  );
+
+  const signOut = useCallback(() => effects.signOut(dispatch), []);
 
   const clearError = useCallback(() => dispatch(clearErrorAction()), []);
 
   const value = useMemo(
-    () => ({ ...state, signIn, register, signOut, clearError }),
-    [state, signIn, register, signOut, clearError],
+    () => ({ ...state, booting, signIn, register, signOut, clearError }),
+    [state, booting, signIn, register, signOut, clearError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -4,35 +4,38 @@ import { useAuth } from '../context/AuthContext';
 import { Field, inputClass } from '../components/Field';
 
 type Mode = 'signin' | 'register';
-type FieldName = 'email' | 'password' | 'confirmPassword';
 
 export function Login() {
-  const { signIn, register } = useAuth();
+  const { signIn, register, loading, error, clearError } = useAuth();
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
 
   const registering = mode === 'register';
 
-  function handleSubmit(event: React.FormEvent) {
+  // The error lives in the container, attributed to a field, so the form only
+  // has to ask which one it belongs to.
+  const errorFor = (field: string) =>
+    error?.field === field ? error.message : undefined;
+
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
-    const result = registering
-      ? register(email, password, confirmPassword)
-      : signIn(email, password);
-
     // On success the route guard swaps this screen out; nothing to do here.
-    if (!result.ok) setErrors({ [result.field]: result.message });
+    if (registering) {
+      await register(email, password, confirmPassword);
+    } else {
+      await signIn(email, password);
+    }
   }
 
   function switchMode() {
     setMode(registering ? 'signin' : 'register');
     setConfirmPassword('');
-    setErrors({});
+    clearError();
   }
 
   return (
@@ -44,13 +47,13 @@ export function Login() {
         <h1 className="mt-4 text-2xl font-bold">GrabnGo bag</h1>
         <p className="mt-1 text-sm text-muted">
           {registering
-            ? 'Create an account to start tracking your kit.'
+            ? 'Create an account and we’ll pack you a starter bag.'
             : 'Know what’s in your bag, and what’s about to expire.'}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <Field label="Email" error={errors.email}>
+        <Field label="Email" error={errorFor('email')}>
           {(field) => (
             <input
               {...field}
@@ -59,15 +62,16 @@ export function Login() {
               value={email}
               onChange={(event) => {
                 setEmail(event.target.value);
-                setErrors((current) => ({ ...current, email: undefined }));
+                clearError();
               }}
               placeholder="you@example.com"
               autoComplete="email"
+              disabled={loading}
             />
           )}
         </Field>
 
-        <Field label="Password" error={errors.password}>
+        <Field label="Password" error={errorFor('password')}>
           {(field) => (
             <div className="relative">
               <input
@@ -77,9 +81,10 @@ export function Login() {
                 value={password}
                 onChange={(event) => {
                   setPassword(event.target.value);
-                  setErrors((current) => ({ ...current, password: undefined }));
+                  clearError();
                 }}
                 autoComplete={registering ? 'new-password' : 'current-password'}
+                disabled={loading}
               />
               <button
                 type="button"
@@ -93,7 +98,7 @@ export function Login() {
         </Field>
 
         {registering && (
-          <Field label="Confirm password" error={errors.confirmPassword}>
+          <Field label="Confirm password" error={errorFor('confirmPassword')}>
             {(field) => (
               <input
                 {...field}
@@ -102,9 +107,10 @@ export function Login() {
                 value={confirmPassword}
                 onChange={(event) => {
                   setConfirmPassword(event.target.value);
-                  setErrors((current) => ({ ...current, confirmPassword: undefined }));
+                  clearError();
                 }}
                 autoComplete="new-password"
+                disabled={loading}
               />
             )}
           </Field>
@@ -112,11 +118,26 @@ export function Login() {
 
         <button
           type="submit"
-          className="min-h-11 w-full rounded-control bg-brand font-semibold text-on-brand transition-opacity hover:opacity-90"
+          disabled={loading}
+          className="min-h-11 w-full rounded-control bg-brand font-semibold text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {registering ? 'Create account' : 'Sign in'}
+          {loading
+            ? registering
+              ? 'Creating your account…'
+              : 'Signing in…'
+            : registering
+              ? 'Create account'
+              : 'Sign in'}
         </button>
       </form>
+
+      {registering && (
+        <p className="mt-4 rounded-card border border-line bg-surface px-4 py-3 text-sm text-muted">
+          Your bag starts with a few common kit items already in it, including
+          some that expire soon — so you’ll get your first reminder by email
+          tomorrow morning.
+        </p>
+      )}
 
       <p className="mt-5 text-center text-sm text-muted">
         {registering ? 'Already have an account? ' : 'No account yet? '}
