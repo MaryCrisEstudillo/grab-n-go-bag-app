@@ -17,7 +17,7 @@ export function Categories() {
     categories,
     items,
     addCategory,
-    loading,
+    loaded,
     error,
     reload,
     clearError,
@@ -51,9 +51,9 @@ export function Categories() {
     return counts;
   }, [categories, items]);
 
-  // Only the very first fetch blocks the screen. Once there's a bag to show,
-  // a later reload happens underneath it rather than blanking it out.
-  if (loading && categories.length === 0) return <Splash />;
+  // Only the very first fetch blocks the screen. Once the bag has arrived, a
+  // later reload happens underneath it rather than blanking it out.
+  if (!loaded) return <Splash />;
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-6">

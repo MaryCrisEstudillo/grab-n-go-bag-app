@@ -1,0 +1,73 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # So a rebuild can be triggered by hand after the API URL changes, without
+  # having to push an empty commit.
+  workflow_dispatch:
+
+# Vite bakes VITE_* values into the bundle at build time, so these are set here
+# rather than at runtime. Neither is a secret — they're public URLs that ship
+# inside the JavaScript either way, which is why they're repository *variables*
+# rather than secrets.
+#
+#   Settings → Secrets and variables → Actions → Variables:
+#     API_BASE_URL   https://xxxx.execute-api.<region>.amazonaws.com
+env:
+  VITE_BASE_PATH: /${{ github.event.repository.name }}/
+  VITE_AUTH_URL: ${{ vars.API_BASE_URL }}/auth
+  VITE_BAG_API_URL: ${{ vars.API_BASE_URL }}/bag
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A second push shouldn't cancel a deploy that's already publishing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Typecheck and tests run as part of the deploy on purpose: a broken
+      # build should fail here rather than on the live site.
+      - run: npm test
+
+      - name: Fail if the API URL was never configured
+        # Without this the site deploys successfully and then can't talk to
+        # anything, which is a much slower thing to debug than a failed job.
+        run: |
+          if [ -z "${{ vars.API_BASE_URL }}" ]; then
+            echo "::error::Repository variable API_BASE_URL is not set."
+            echo "Set it under Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

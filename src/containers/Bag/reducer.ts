@@ -43,6 +43,19 @@ export interface BagContainerState {
   items: Item[];
   /** Only the initial load blocks the screen; edits apply optimistically. */
   loading: boolean;
+  /**
+   * Whether the bag has been fetched at all, successfully or not.
+   *
+   * Distinct from `loading`, and needed because an empty bag and an unfetched
+   * one look identical otherwise. A page that concludes "no such category"
+   * from an empty list would be wrong on every first paint — including the
+   * one that matters, opening a link straight to a category.
+   *
+   * `loading` can't stand in for it: on the very first render the effect that
+   * starts the fetch hasn't run yet, so nothing is loading and nothing is
+   * loaded.
+   */
+  loaded: boolean;
   error: string | null;
 }
 
@@ -50,6 +63,7 @@ export const initialState: BagContainerState = {
   categories: [],
   items: [],
   loading: false,
+  loaded: false,
   error: null,
 };
 
@@ -71,11 +85,14 @@ const bagReducer = (
         categories: action.response.categories,
         items: action.response.items,
         loading: false,
+        loaded: true,
         error: null,
       };
 
+    // Loaded, even though it failed: the answer is known, and the pages that
+    // wait on it would otherwise wait forever on a dropped connection.
     case LOAD_BAG_FAIL:
-      return { ...state, loading: false, error: action.error };
+      return { ...state, loading: false, loaded: true, error: action.error };
 
     case CLEAR_ERROR:
       return { ...state, error: null };

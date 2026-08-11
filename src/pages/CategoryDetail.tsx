@@ -10,6 +10,7 @@ import { ItemForm } from '../components/ItemForm';
 import { CategoryForm } from '../components/CategoryForm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Modal } from '../components/Modal';
+import { Splash } from '../components/Splash';
 
 /** Deleting a category holding items asks twice, naming the count each time. */
 type DeleteStep = 'none' | 'first' | 'second';
@@ -19,6 +20,7 @@ export function CategoryDetail() {
   const navigate = useNavigate();
   const {
     categories,
+    loaded,
     categoryById,
     itemsIn,
     addItem,
@@ -62,6 +64,13 @@ export function CategoryDetail() {
   }, [menuOpen]);
 
   // A deleted category (or a hand-typed id) has no screen to show.
+  /**
+   * Order matters here. Opening a link straight to a category renders this
+   * before the bag has been fetched, and an empty bag would otherwise read as
+   * "no such category" — bouncing the visitor to the home page instead of the
+   * thing they clicked on.
+   */
+  if (!loaded) return <Splash />;
   if (!category) return <Navigate to="/" replace />;
 
   const Icon = iconFor(category.icon);

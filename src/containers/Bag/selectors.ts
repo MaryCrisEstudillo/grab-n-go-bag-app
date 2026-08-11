@@ -26,6 +26,10 @@ const makeSelectItems = () => (state: BagContainerState): Item[] =>
 const makeSelectLoading = () => (state: BagContainerState): boolean =>
   selectBagDomain(state).loading;
 
+/** Ask this, not `categories.length`, before concluding something isn't there. */
+const makeSelectLoaded = () => (state: BagContainerState): boolean =>
+  selectBagDomain(state).loaded;
+
 const makeSelectError = () => (state: BagContainerState): string | null =>
   selectBagDomain(state).error;
 
@@ -54,6 +58,7 @@ export {
   makeSelectCategories,
   makeSelectItems,
   makeSelectLoading,
+  makeSelectLoaded,
   makeSelectError,
   makeSelectItemsByCategory,
   makeSelectCategoryById,

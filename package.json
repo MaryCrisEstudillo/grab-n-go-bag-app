@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && npm run build:spa-fallback",
+    "build:spa-fallback": "cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^26.2.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

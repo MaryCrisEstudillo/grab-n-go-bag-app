@@ -38,6 +38,48 @@ const stateWith = (patch: Partial<BagContainerState>): BagContainerState => ({
   ...patch,
 });
 
+/**
+ * Guards the bug this flag exists for: opening a link straight to a category
+ * renders the page before the bag arrives, and an empty bag must not be read
+ * as "no such category" and bounce the visitor to the home page.
+ */
+describe('knowing whether the bag has arrived', () => {
+  it('starts not loaded, so nothing concludes a category is missing', () => {
+    expect(initialState.loaded).toBe(false);
+  });
+
+  it('is still not loaded while the first fetch is in flight', () => {
+    expect(bagReducer(initialState, loadBagAction()).loaded).toBe(false);
+  });
+
+  it('is loaded once the bag arrives, even when the bag is empty', () => {
+    const next = bagReducer(
+      initialState,
+      loadBagSuccessAction({ categories: [], items: [] }),
+    );
+
+    expect(next.loaded).toBe(true);
+    expect(next.categories).toEqual([]);
+  });
+
+  // Otherwise a dropped connection leaves every page waiting forever.
+  it('is loaded even when the fetch failed', () => {
+    const next = bagReducer(bagReducer(initialState, loadBagAction()), loadBagFailAction('offline'));
+
+    expect(next.loaded).toBe(true);
+    expect(next.error).toBe('offline');
+  });
+
+  it('stays loaded across a later refetch', () => {
+    const loadedState = bagReducer(
+      initialState,
+      loadBagSuccessAction({ categories: [category('c1')], items: [] }),
+    );
+
+    expect(bagReducer(loadedState, loadBagAction()).loaded).toBe(true);
+  });
+});
+
 describe('loading the bag', () => {
   it('clears any previous error when the load starts', () => {
     const next = bagReducer(stateWith({ error: 'offline' }), loadBagAction());
@@ -53,7 +95,7 @@ describe('loading the bag', () => {
       loadBagSuccessAction(response),
     );
 
-    expect(next).toEqual({ ...response, loading: false, error: null });
+    expect(next).toEqual({ ...response, loading: false, loaded: true, error: null });
   });
 
   it('keeps what is already on screen when the load fails', () => {

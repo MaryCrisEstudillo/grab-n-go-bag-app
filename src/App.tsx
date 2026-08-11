@@ -29,7 +29,12 @@ function RedirectIfSignedIn() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    /**
+     * The router has to know about the same prefix Vite builds against, or on
+     * GitHub Pages every path is one level deeper than it thinks and nothing
+     * matches. Vite fills `BASE_URL` in from `base`, so the two can't drift.
+     */
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <BagProvider>
           <Routes>
