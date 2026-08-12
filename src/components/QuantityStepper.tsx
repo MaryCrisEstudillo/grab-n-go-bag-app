@@ -10,7 +10,7 @@ interface Props {
 /** Clamps rather than errors — holding minus at zero should just stop. */
 export function QuantityStepper({ value, label, onChange }: Props) {
   const buttonClass =
-    'flex size-11 items-center justify-center rounded-control border border-line text-ink transition-colors enabled:hover:bg-surface disabled:opacity-35';
+    'flex size-11 items-center justify-center rounded-control border border-line text-ink transition-colors enabled:hover:border-accent enabled:hover:bg-accent-soft disabled:opacity-35';
 
   return (
     <div className="flex items-center gap-1">

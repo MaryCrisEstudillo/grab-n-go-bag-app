@@ -66,7 +66,7 @@ export function Categories() {
             onClick={signOut}
             aria-label="Sign out"
             title="Sign out"
-            className="flex size-11 items-center justify-center rounded-control border border-line text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="flex size-11 items-center justify-center rounded-control border border-line text-muted transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent-ink"
           >
             <LogOut size={18} />
           </button>
@@ -101,7 +101,7 @@ export function Categories() {
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-line-strong text-muted transition-colors hover:border-ink hover:text-ink"
+          className="accent-hover flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-card border-2 border-dashed border-line-strong text-muted hover:text-accent-ink"
         >
           <Plus size={22} />
           <span className="text-sm font-medium">Add category</span>

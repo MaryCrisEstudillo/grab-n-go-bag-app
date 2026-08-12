@@ -17,6 +17,15 @@
   --danger-line: #f0c9c9;
   --neutral-btn: #111111;
   --on-neutral-btn: #ffffff;
+
+  /* Hover accent. Neon green is the point, but pure neon on white is
+     unreadable as text (about 1.4:1), so the loud version is used for borders,
+     glows and fills, and `accent-ink` is the darkened one that carries text at
+     5.3:1. Both read as the same colour. */
+  --accent: #00cc44;
+  --accent-ink: #0a7d33;
+  --accent-soft: rgba(0, 224, 90, 0.12);
+  --accent-glow: rgba(0, 204, 68, 0.28);
 }
 
 .dark {
@@ -34,6 +43,12 @@
   --danger-line: #52201e;
   --neutral-btn: #f2f2f4;
   --on-neutral-btn: #121214;
+
+  /* Against a dark page the real thing is legible, so this is actual neon. */
+  --accent: #39ff14;
+  --accent-ink: #7cff5c;
+  --accent-soft: rgba(57, 255, 20, 0.14);
+  --accent-glow: rgba(57, 255, 20, 0.38);
 }
 
 @theme inline {
@@ -51,6 +66,9 @@
   --color-danger-line: var(--danger-line);
   --color-neutral-btn: var(--neutral-btn);
   --color-on-neutral-btn: var(--on-neutral-btn);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --radius-control: 12px;
   --radius-card: 14px;
   --radius-screen: 22px;
@@ -82,5 +100,62 @@
   :focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* The loud hover, for things that are a whole tappable surface — category
+     tiles, item cards. A colour change alone reads as decoration on a large
+     block, so this also draws the outline in and lifts it off the page. */
+  .accent-hover {
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .accent-hover:hover {
+    border-color: var(--accent);
+    box-shadow:
+      0 0 0 1px var(--accent),
+      0 6px 22px var(--accent-glow);
+  }
+
+  /* Pointer devices only. On a touch screen :hover sticks after a tap, so the
+     lift would stay applied to whatever you last touched. */
+  @media (hover: hover) and (pointer: fine) {
+    .accent-hover:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accent-hover {
+      transition: none;
+    }
+
+    .accent-hover:hover {
+      transform: none;
+    }
+  }
+
+  /* For filled buttons, which already have their own fill and so can't take a
+     background or border change. Only the neutral ones — a green halo around
+     the red destructive buttons would undercut what the red is there to say. */
+  .accent-glow-hover {
+    transition:
+      box-shadow 150ms ease,
+      opacity 150ms ease;
+  }
+
+  .accent-glow-hover:hover:not(:disabled) {
+    box-shadow: 0 4px 18px var(--accent-glow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accent-glow-hover {
+      transition: none;
+    }
   }
 }

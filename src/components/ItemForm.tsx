@@ -131,13 +131,13 @@ export function ItemForm({ item, categoryId, onSubmit, onCancel }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-11 flex-1 rounded-control border border-line font-medium text-muted transition-colors hover:bg-surface hover:text-ink"
+          className="min-h-11 flex-1 rounded-control border border-line font-medium text-muted transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent-ink"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="min-h-11 flex-1 rounded-control bg-neutral-btn font-semibold text-on-neutral-btn transition-opacity hover:opacity-90"
+          className="min-h-11 flex-1 rounded-control accent-glow-hover bg-neutral-btn font-semibold text-on-neutral-btn hover:opacity-90"
         >
           {item ? 'Save changes' : 'Add item'}
         </button>

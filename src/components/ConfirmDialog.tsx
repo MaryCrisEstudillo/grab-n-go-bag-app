@@ -23,7 +23,7 @@ export function ConfirmDialog({
         <button
           type="button"
           onClick={onCancel}
-          className="min-h-11 flex-1 rounded-control border border-line font-medium text-muted transition-colors hover:bg-surface hover:text-ink"
+          className="min-h-11 flex-1 rounded-control border border-line font-medium text-muted transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent-ink"
         >
           Cancel
         </button>

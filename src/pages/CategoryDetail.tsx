@@ -89,7 +89,7 @@ export function CategoryDetail() {
     <main className="mx-auto w-full max-w-2xl px-4 py-6">
       <Link
         to="/"
-        className="-ml-1 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-muted transition-colors hover:text-ink"
+        className="-ml-1 inline-flex min-h-11 items-center gap-1 text-sm font-medium text-muted transition-colors hover:text-accent-ink"
       >
         <ChevronLeft size={18} />
         Your bag
@@ -113,7 +113,7 @@ export function CategoryDetail() {
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             aria-label={`Actions for ${category.name}`}
-            className="flex size-11 items-center justify-center rounded-control border border-line text-muted transition-colors hover:bg-surface hover:text-ink"
+            className="flex size-11 items-center justify-center rounded-control border border-line text-muted transition-colors hover:border-accent hover:bg-accent-soft hover:text-accent-ink"
           >
             <MoreVertical size={18} />
           </button>
@@ -130,7 +130,7 @@ export function CategoryDetail() {
                   setMenuOpen(false);
                   setRenaming(true);
                 }}
-                className="block min-h-11 w-full px-4 text-left text-sm text-ink transition-colors hover:bg-surface"
+                className="block min-h-11 w-full px-4 text-left text-sm text-ink transition-colors hover:bg-accent-soft"
               >
                 Rename
               </button>
@@ -172,7 +172,7 @@ export function CategoryDetail() {
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="min-h-11 w-full rounded-control bg-neutral-btn font-semibold text-on-neutral-btn transition-opacity hover:opacity-90"
+          className="min-h-11 w-full rounded-control accent-glow-hover bg-neutral-btn font-semibold text-on-neutral-btn hover:opacity-90"
         >
           Add item
         </button>

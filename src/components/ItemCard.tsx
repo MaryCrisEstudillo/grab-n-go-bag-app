@@ -43,7 +43,7 @@ export function ItemCard({ item, onQuantity, onEdit, onDelete }: Props) {
           <button
             type="button"
             onClick={onEdit}
-            className="min-h-11 rounded-control px-3 text-sm font-medium text-muted transition-colors hover:bg-page hover:text-ink"
+            className="min-h-11 rounded-control px-3 text-sm font-medium text-muted transition-colors hover:bg-accent-soft hover:text-accent-ink"
           >
             Edit
           </button>

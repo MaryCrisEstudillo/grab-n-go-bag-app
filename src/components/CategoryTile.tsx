@@ -15,7 +15,7 @@ export function CategoryTile({ category, itemCount, expiredCount }: Props) {
   return (
     <Link
       to={`/category/${category.id}`}
-      className="flex min-h-[7.5rem] flex-col justify-between rounded-card border border-line bg-surface p-4 transition-colors hover:border-line-strong"
+      className="accent-hover flex min-h-[7.5rem] flex-col justify-between rounded-card border border-line bg-surface p-4"
     >
       <Icon size={22} className={hasExpired ? 'text-brand' : 'text-muted'} />
 
