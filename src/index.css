@@ -18,14 +18,16 @@
   --neutral-btn: #111111;
   --on-neutral-btn: #ffffff;
 
-  /* Hover accent. Neon green is the point, but pure neon on white is
-     unreadable as text (about 1.4:1), so the loud version is used for borders,
-     glows and fills, and `accent-ink` is the darkened one that carries text at
-     5.3:1. Both read as the same colour. */
-  --accent: #00cc44;
-  --accent-ink: #0a7d33;
-  --accent-soft: rgba(0, 224, 90, 0.12);
-  --accent-glow: rgba(0, 204, 68, 0.28);
+  /* Hover accent. Indigo because red is already spoken for by `expired` and
+     amber by `expiring soon` — an accent anywhere near those would read as a
+     status rather than as "you can click this".
+
+     Two shades: the lighter one draws borders, glows and fills, and
+     `accent-ink` is the deeper one that carries text at 7.4:1 on white. */
+  --accent: #4f46e5;
+  --accent-ink: #4338ca;
+  --accent-soft: rgba(79, 70, 229, 0.1);
+  --accent-glow: rgba(79, 70, 229, 0.25);
 }
 
 .dark {
@@ -44,11 +46,13 @@
   --neutral-btn: #f2f2f4;
   --on-neutral-btn: #121214;
 
-  /* Against a dark page the real thing is legible, so this is actual neon. */
-  --accent: #39ff14;
-  --accent-ink: #7cff5c;
-  --accent-soft: rgba(57, 255, 20, 0.14);
-  --accent-glow: rgba(57, 255, 20, 0.38);
+  /* Lifted against the dark page — the light-mode indigo would sink into it. */
+  --accent: #818cf8;
+  --accent-ink: #a5b4fc;
+  --accent-soft: rgba(129, 140, 248, 0.14);
+  /* Weaker than the light-mode glow on purpose: a soft shadow spreading onto a
+     near-black page shows up far more than the same shadow does on white. */
+  --accent-glow: rgba(129, 140, 248, 0.16);
 }
 
 @theme inline {
@@ -141,7 +145,7 @@
   }
 
   /* For filled buttons, which already have their own fill and so can't take a
-     background or border change. Only the neutral ones — a green halo around
+     background or border change. Only the neutral ones — an indigo halo around
      the red destructive buttons would undercut what the red is there to say. */
   .accent-glow-hover {
     transition:
