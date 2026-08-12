@@ -133,9 +133,8 @@ export function Login() {
 
       {registering && (
         <p className="mt-4 rounded-card border border-line bg-surface px-4 py-3 text-sm text-muted">
-          Your bag starts with a few common kit items already in it, including
-          some that expire soon — so you’ll get your first reminder by email
-          tomorrow morning.
+          Your bag starts with eight categories ready to fill. Add anything with
+          an expiry date and we’ll email you a reminder before it runs out.
         </p>
       )}
 
