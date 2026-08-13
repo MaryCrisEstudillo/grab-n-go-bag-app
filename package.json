@@ -2,7 +2,7 @@
   "name": "grabngo-bag",
   "private": true,
   "version": "0.1.0",
-  "description": "GrabnGo bag — track emergency-kit items and their expiry dates.",
+  "description": "GrabnGo App. Track emergency-kit items and their expiry dates.",
   "type": "module",
   "engines": {
     "node": ">=20"
