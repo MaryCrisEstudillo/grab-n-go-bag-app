@@ -1,20 +1,36 @@
-# GrabnGo bag
+# GrabnGo App
 
 A mobile-first web app for tracking emergency-kit items and their expiry dates.
 
-Frontend only — there is no backend. All state lives in React and persists to
-`localStorage` behind a single module, so it can be swapped for a real API
-without touching a component.
+This is the frontend. It talks to the GrabnGo API, which lives in its own repo
+(`grab-n-go-bag-api`) and owns the database, the accounts and the expiry
+reminder emails. Nothing is stored in the browser except the session token and
+the theme choice.
 
 ## Running it
 
-Requires Node 20+ (there's an `.nvmrc`).
+Requires Node 22+ (there's an `.nvmrc`).
 
 ```sh
 nvm use
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # http://localhost:3000
 ```
+
+The API has to be running too, on port 3001, or every request fails with
+"Couldn't reach the server". Start it first, from the API repo, with
+`npm run dev`.
+
+Copy `.env.example` to `.env` and point it at that API:
+
+```sh
+VITE_AUTH_URL=http://localhost:3001/auth
+VITE_BAG_API_URL=http://localhost:3001/bag
+```
+
+Both variables name the **API's** port, never this app's. Only names beginning
+`VITE_` reach browser code, which is what keeps anything else in the file out
+of the bundle.
 
 | Script | Does |
 | --- | --- |
@@ -42,12 +58,11 @@ src/
   containers/Auth/     the same five, for the session
   lib/expiry.ts        Pure expiry maths — days left, status, labels, sorting
   lib/validation.ts    Pure form rules, all unit-tested
-  lib/auth.ts          Stubbed auth (SWAP POINT for the real API)
   lib/storage.ts       The only module that touches localStorage
   lib/dates.ts         Calendar-day helpers
-  context/BagContext   Holds the Bag reducer and persists it (SWAP POINT)
-  context/AuthContext  Holds the Auth reducer
-  pages/               Login, Categories, CategoryDetail
+  context/BagContext   Holds the Bag reducer and runs its effects
+  context/AuthContext  Holds the Auth reducer and runs its effects
+  pages/               Welcome, Login, Categories, CategoryDetail
   components/          Presentational pieces
 ```
 
@@ -163,9 +178,9 @@ The two differences from ggx-pwa, both deliberate:
   action, `await` the gateway, dispatch `_SUCCESS` or `_FAIL`. Same three-phase
   shape, no generators and no extra dependencies.
 
-**Every write is optimistic.** The bare action applies the change immediately —
-which is exactly what the app does today with no backend at all — `_SUCCESS`
-reconciles the row with what the service actually stored, and `_FAIL` undoes it.
+**Every write is optimistic.** The bare action applies the change immediately,
+`_SUCCESS` reconciles the row with what the service actually stored, and
+`_FAIL` undoes it.
 Creates are the interesting case: the id is minted client-side so the row can be
 on screen before the request is answered, then `ADD_ITEM_SUCCESS` swaps it for
 the stored row in place. A new *category* also reparents any items already filed
@@ -176,15 +191,17 @@ error.
 `loading` covers the initial fetch alone. Edits never set it — an optimistic
 change that also flashed a spinner would be the worst of both.
 
-**Nothing calls `effects.ts` or the gateways yet.** The app runs on the bare
-actions and `localStorage`. Pointing it at a real service means calling the
-matching effect instead of dispatching directly, at the two SWAP POINTs.
-
 ### Auth
 
-Stubbed: any valid email with an 8+ character password is accepted and the
-session is a `localStorage` entry. Isolated in `src/lib/auth.ts`, marked as the
-swap point for the real API.
+Real accounts, held by the API. Registering seeds a bag of eight categories and
+signs you in. The session is a JWT the API issues, kept in `localStorage` and
+sent as an `Authorization` header by every gateway that needs one. On boot the
+app asks the API who the token belongs to, and drops it if the answer is no
+longer valid.
+
+A failed sign-in says which field is wrong. An unregistered address is reported
+against the email input, a bad password against the password one, because the
+API names the field in its error body and `Auth/effects.ts` honours it.
 
 ## Tests
 
