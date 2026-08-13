@@ -108,6 +108,23 @@
 }
 
 @layer components {
+  /* The mark ships as two PNGs. Black line work for the light page, white for
+     the dark one. Painted as a background rather than as two <img> tags so the
+     browser only fetches the one it ends up showing; both are ~145kB, and this
+     is the first thing on screen. The element carries its own width and height,
+     which is what gives `contain` something to fit inside.
+
+     The paths are root-absolute because they live in `public/`. Vite rewrites
+     them to sit under `base`, so they survive the move to a project page at
+     `/grab-n-go-bag-app/`. */
+  .logo-mark {
+    background: center / contain no-repeat url('/bagLogo.png');
+  }
+
+  .dark .logo-mark {
+    background-image: url('/bagLogoForDark.png');
+  }
+
   /* The loud hover, for things that are a whole tappable surface — category
      tiles, item cards. A colour change alone reads as decoration on a large
      block, so this also draws the outline in and lifts it off the page. */

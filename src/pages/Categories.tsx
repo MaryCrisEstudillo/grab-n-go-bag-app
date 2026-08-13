@@ -58,7 +58,7 @@ export function Categories() {
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-6">
       <header className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Your bag</h1>
+        <h1 className="text-2xl font-bold">Inside your bag</h1>
         <div className="flex items-center gap-2">
           <ThemeToggle theme={theme} onToggle={toggle} />
           <button

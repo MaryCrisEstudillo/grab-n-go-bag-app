@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Briefcase } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { BrandMark } from '../components/Logo';
 import { Field, inputClass } from '../components/Field';
 
 type Mode = 'signin' | 'register';
@@ -40,12 +40,11 @@ export function Login() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-10">
-      <div className="mb-7">
-        <div className="flex size-14 items-center justify-center rounded-card bg-brand text-on-brand">
-          <Briefcase size={26} />
-        </div>
-        <h1 className="mt-4 text-2xl font-bold">GrabnGo bag</h1>
-        <p className="mt-1 text-sm text-muted">
+      {/* Centred, and the same mark and wordmark the welcome screen opens with,
+          so arriving here reads as the next step rather than a new place. */}
+      <div className="mb-7 text-center">
+        <BrandMark size={132} />
+        <p className="mx-auto mt-3 max-w-xs text-sm text-muted">
           {registering
             ? 'Create an account and we’ll pack you a starter bag.'
             : 'Know what’s in your bag, and what’s about to expire.'}

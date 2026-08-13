@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { BagProvider } from './context/BagContext';
+import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Categories } from './pages/Categories';
 import { CategoryDetail } from './pages/CategoryDetail';
@@ -17,14 +19,17 @@ function RequireAuth() {
   const { user, booting } = useAuth();
 
   if (booting) return <Splash />;
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  // Signed out lands on the welcome screen, not the form. The form is what
+  // that screen's one button leads to.
+  return user ? <Outlet /> : <Navigate to="/welcome" replace />;
 }
 
-function RedirectIfSignedIn() {
+/** Nobody signed in has any use for the welcome or login screens. */
+function RedirectIfSignedIn({ children }: { children: ReactNode }) {
   const { user, booting } = useAuth();
 
   if (booting) return <Splash />;
-  return user ? <Navigate to="/" replace /> : <Login />;
+  return user ? <Navigate to="/" replace /> : <>{children}</>;
 }
 
 export default function App() {
@@ -38,7 +43,22 @@ export default function App() {
       <AuthProvider>
         <BagProvider>
           <Routes>
-            <Route path="/login" element={<RedirectIfSignedIn />} />
+            <Route
+              path="/welcome"
+              element={
+                <RedirectIfSignedIn>
+                  <Welcome />
+                </RedirectIfSignedIn>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <RedirectIfSignedIn>
+                  <Login />
+                </RedirectIfSignedIn>
+              }
+            />
             <Route element={<RequireAuth />}>
               <Route path="/" element={<Categories />} />
               <Route path="/category/:id" element={<CategoryDetail />} />
