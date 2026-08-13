@@ -12,7 +12,7 @@
 import type { Category, Item } from '../../types';
 import { createId } from '../../lib/id';
 import { DEFAULT_ICON } from '../../lib/icons';
-import { ApiError } from '../../utils/request';
+import { ApiError, InvalidJsonError, apiErrorDetail } from '../../utils/request';
 import {
   createCategoryAPI,
   createItemAPI,
@@ -59,15 +59,20 @@ export type ItemDraftValues = Omit<Item, 'id'>;
 
 /** Whatever the service sent, reduced to something worth showing a person. */
 function messageFrom(error: unknown): string {
-  if (error instanceof ApiError) {
-    const { body } = error;
-    if (typeof body === 'string' && body) return body;
-    if (body && typeof body === 'object' && 'message' in body) {
-      const { message } = body as { message?: unknown };
-      if (typeof message === 'string' && message) return message;
-    }
-    return `Request failed (${error.status}).`;
+  const { message } = apiErrorDetail(error);
+  if (message) return message;
+
+  if (error instanceof ApiError) return `Request failed (${error.status}).`;
+
+  /**
+   * Its message names a URL and a content type, which is for whoever
+   * misconfigured the base URL, not for the person looking at the banner.
+   * Checked before `Error` because it is one.
+   */
+  if (error instanceof InvalidJsonError) {
+    return 'Couldn’t reach the server. Try again.';
   }
+
   if (error instanceof Error) return error.message;
   return 'Something went wrong.';
 }
